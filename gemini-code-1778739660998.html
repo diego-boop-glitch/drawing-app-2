@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Paint</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; background: #f0f0f0; margin: 0; }
+        .toolbar { background: #333; color: white; padding: 10px; width: 100%; display: flex; justify-content: center; gap: 15px; align-items: center; }
+        canvas { background: white; border: 2px solid #999; cursor: crosshair; margin-top: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        button { cursor: pointer; padding: 5px 10px; }
+    </style>
+</head>
+<body>
+
+<div class="toolbar">
+    <label>Color: <input type="color" id="colorPicker" value="#000000"></label>
+    <label>Size: <input type="range" id="sizePicker" min="1" max="50" value="5"></label>
+    <button id="clearBtn">Clear Canvas</button>
+    <button id="eraserBtn">Eraser</button>
+</div>
+
+<canvas id="paintCanvas" width="800" height="500"></canvas>
+
+<script>
+    const canvas = document.getElementById('paintCanvas');
+    const ctx = canvas.getContext('2d');
+    const colorPicker = document.getElementById('colorPicker');
+    const sizePicker = document.getElementById('sizePicker');
+    const clearBtn = document.getElementById('clearBtn');
+    const eraserBtn = document.getElementById('eraserBtn');
+
+    let painting = false;
+    let currentColor = colorPicker.value;
+
+    // Start drawing
+    function startPosition(e) {
+        painting = true;
+        draw(e);
+    }
+
+    // Stop drawing
+    function finishedPosition() {
+        painting = false;
+        ctx.beginPath(); // Resets the path so lines don't connect weirdly
+    }
+
+    // Drawing logic
+    function draw(e) {
+        if (!painting) return;
+
+        ctx.lineWidth = sizePicker.value;
+        ctx.lineCap = 'round'; // Makes lines smooth
+        ctx.strokeStyle = currentColor;
+
+        // Get correct mouse position relative to canvas
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+    }
+
+    // Event Listeners
+    canvas.addEventListener('mousedown', startPosition);
+    canvas.addEventListener('mouseup', finishedPosition);
+    canvas.addEventListener('mousemove', draw);
+
+    colorPicker.addEventListener('input', (e) => {
+        currentColor = e.target.value;
+    });
+
+    eraserBtn.addEventListener('click', () => {
+        currentColor = '#FFFFFF'; // Just "paints" white
+    });
+
+    clearBtn.addEventListener('click', () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    });
+</script>
+
+</body>
+</html>
